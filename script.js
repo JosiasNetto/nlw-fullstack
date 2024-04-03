@@ -1,4 +1,4 @@
-//array
+//Array relativo ao objeto participante e seus atributos
 let participantes = [
   {
     nome: 'Josias Netto',
@@ -62,7 +62,7 @@ let participantes = [
   }
 ];
 
-
+//Funcao que recebe o participante e retorna todas suas infos no formato da tabela
 const criar_participante = (participante) => {
 
   const data_inscricao = dayjs(Date.now()).to(participante.data_inscricao)
@@ -81,6 +81,7 @@ const criar_participante = (participante) => {
   `
 }
 
+//Funcao que atualiza a tabela de participantes no HTML
 const atualizar_lista = (participantes) => {
   //pegar info do Html
 
