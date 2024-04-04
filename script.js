@@ -65,9 +65,21 @@ let participantes = [
 //Funcao que recebe o participante e retorna todas suas infos no formato da tabela
 const criar_participante = (participante) => {
 
+  //Declarando as info datas dos participantes no formato do day.js
   const data_inscricao = dayjs(Date.now()).to(participante.data_inscricao)
-  const data_checkin = dayjs(Date.now()).to(participante.data_checkin)
+  let data_checkin = dayjs(Date.now()).to(participante.data_checkin)
 
+  //Verifica se o participante ja fez check-in
+  ///Caso nao, a info da data do check-in eh declarada como o proprio botao para faze-lo
+  if(participante.data_checkin == null) {
+    data_checkin = `
+    <button data-email="${participante.email}"onclick="fazer_checkin(event)">
+      Confirmar check-in
+    </button>
+    `
+  }
+
+  //Retorna as infos do participante no formato pronto para a table no Html
   return `
   <tr>
     <td> 
@@ -83,11 +95,11 @@ const criar_participante = (participante) => {
 
 //Funcao que atualiza a tabela de participantes no HTML
 const atualizar_lista = (participantes) => {
-  //pegar info do Html
 
+  //Declarando a variavel que agrupara todos os participantes no formato da table
   let output = ""
 
-  //loop
+  //Loop que passa pelo array de participantes, e add cada um a var do output
   for (let participante of participantes) {
     output = output + criar_participante(participante)
   }
@@ -96,5 +108,67 @@ const atualizar_lista = (participantes) => {
   document.querySelector('tbody').innerHTML = output
 }
 
+//Executa a funcao
 atualizar_lista(participantes)
+
+//Funcao que adciona participante ao apertar o botao
+const adcionar_participante = (event) => {
+  event.preventDefault()
+
+  //Declara a variavel que recebe as infos do formulario 
+  const form_data = new FormData(event.target)
+  
+  //Declara o obj participante com as infos do form
+  const participante = {
+    nome: form_data.get('nome'),
+    email: form_data.get('email'),
+    data_inscricao: new Date(),
+    data_checkin: null
+  }
+
+  //Variavel para verificar se o email do participante ja foi add anteriormente
+  ///Caso nao, a variavel sera nula
+  ///find() = Itera e procura o participante onde a funcao colocada dentro dela seja True
+  const participante_existe = participantes.find( 
+    (p) => {
+      return p.email == participante.email
+    }
+  )
+
+  //Caso o partipante ja exista na lista, emite o alerta e acaba a funcao
+  if(participante_existe){
+    alert('Email ja cadastrado!')
+    return
+  }
+
+  //Atualiza a lista de participantes com o novo participante
+  participantes = [participante, ...participantes]
+
+  atualizar_lista(participantes)
+
+  //Apaga os valores do nome e email colocados no form
+  event.target.querySelector('[name="nome"]').value = ""
+  event.target.querySelector('[name="email"]').value = ""
+
+}
+
+//Funcao que faz o check-in ao apertar o respectivo botao
+const fazer_checkin = (event) => {
+
+  //Verifica se o usuario realmente deseja fazer o check-in
+  //Casp nao, finaliza a funcao
+  if (confirm('Tem certeza que deseja fazer o check-in?') == false){
+    return
+  }
+
+  //Declara o participante, ao procurar pelo email na lista igual ao email da info do botao
+  const participante = participantes.find((p) => {
+    return p.email == event.target.dataset.email 
+  })
+
+  //Declara a data do check-in
+  participante.data_checkin = new Date()
+
+  atualizar_lista(participantes)
+}
 
